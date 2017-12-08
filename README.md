@@ -1,12 +1,12 @@
 # Gource Generator (gg)
 
-This is a script that generates gource videos like [this](https://www.youtube.com/watch?v=cNBtDstOTmA) for a github-based repos.
+Generates gource videos like [this](https://www.youtube.com/watch?v=cNBtDstOTmA) for a github-based repos.
 
 ## Running it
 
 Make sure you have [gource](http://gource.io/) and [ffmpeg](https://www.ffmpeg.org/) installed. On mac with homebrew, you can run `brew install gource ffmpeg`.
 
-Then run `REPO_URL=[your repo github url] make`.
+Then run `REPO_URL=[your git repo URL] make`. Once completed, you'll have a video available at `./gource.mp4`.
 
 ## Environment variables
 
