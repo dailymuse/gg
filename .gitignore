@@ -1,4 +1,5 @@
-gource.mp4
-venv
-.vscode
-stage
+/repo
+/gource.ppm
+/gource.mp4
+/venv
+/.vscode

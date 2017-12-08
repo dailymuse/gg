@@ -32,9 +32,19 @@ def get_gravatar_url(query, username, password):
     items = response.get("items", [])
     return items[0]["avatar_url"] if items else None
 
-def fetch_avatars(username, password):
+def main():
+    if "GITHUB_USERNAME" not in os.environ:
+        print("`GITHUB_USERNAME` not set; skipping avatar fetch")
+        return
+    elif "GITHUB_PASSWORD" not in os.environ:
+        print("`GITHUB_PASSWORD` not set; skipping avatar fetch")
+        return
+
+    username = os.environ["GITHUB_USERNAME"]
+    password = os.environ["GITHUB_PASSWORD"]
+    
     # Get the authors from the git log
-    gitlog = subprocess.check_output(["git", "log", "--pretty=format:%ae|%an"], cwd=os.path.join("stage", "repo"))
+    gitlog = subprocess.check_output(["git", "log", "--pretty=format:%ae|%an"], cwd="repo")
     authors = set(gitlog.decode("ascii", errors="ignore").splitlines())
     print("Users: ", authors)
 
@@ -42,7 +52,7 @@ def fetch_avatars(username, password):
     for author in authors:
         # Get e-mail and name from log
         email, name = author.split("|")
-        output_file = os.path.join("stage", "avatars", "{}.png".format(name))
+        output_file = os.path.join("avatars", "{}.png".format(name))
         print("Checking {} <{}>".format(name, email))
 
         if os.path.exists(output_file):
@@ -72,30 +82,6 @@ def fetch_avatars(username, password):
                         img.write(r.content)
             except Exception as e:
                 print("There was an error with %s <%s>: %s" % (name, email, e))
-
-def create_video(seconds_per_day):
-    ppm_path = os.path.join(os.getcwd(), "stage", "gource.ppm")
-
-    subprocess.run([
-        "gource",
-        "-1280x720",
-        "--seconds-per-day", seconds_per_day,
-        "--user-image-dir", os.path.join(os.getcwd(), "stage", "avatars"),
-        "-o", ppm_path
-    ], cwd=os.path.join("stage", "repo"), check=True)
-
-    subprocess.run([
-        "ffmpeg", "-y", "-r", "60", "-f", "image2pipe", "-vcodec", "ppm",
-        "-i", ppm_path, "-vcodec", "libx264", "-preset", "ultrafast",
-        "-pix_fmt", "yuv420p", "-crf", "1", "-threads", "0", "-bf", "0",
-        "gource.mp4"
-    ], check=True)
-
-def main():
-    if "GITHUB_USERNAME" in os.environ and "GITHUB_PASSWORD" in os.environ:
-        fetch_avatars(os.environ["GITHUB_USERNAME"], os.environ["GITHUB_PASSWORD"])
-    
-    create_video(os.environ.get("SECONDS_PER_DAY", "1.0"))
 
 if __name__ == "__main__":
     main()
